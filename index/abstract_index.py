@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from utils.utils import normalise_embeddings
 
 class AbstractIndex(ABC):
     def __init__(self, num_vectors, dimension):
