@@ -1,13 +1,14 @@
 from abc import ABC, abstractmethod
 
+
 class AbstractIndex(ABC):
     def __init__(self, num_vectors, dimension):
         self.num_vectors = num_vectors
         self.dimension = dimension
-    
+
     def __str__(self):
         return f"NanoVector Table of [{self.num_vectors},{self.dimension}]."
-    
+
     def __repr__(self):
         return self.__str__
 
