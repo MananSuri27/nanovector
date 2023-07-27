@@ -287,21 +287,13 @@ def test_add():
 
     index = Index(embeddings, dimension)
 
-    new_vector_1 = np.random.rand(1,10)
+    new_vector_1 = np.random.rand(1, 10)
 
     index.add_vector(new_vector_1)
 
-    assert len(index)==11==len(index.embeddings)
+    assert len(index) == 11 == len(index.embeddings)
 
-
-    new_vector_2 = np.random.rand(5,10)
+    new_vector_2 = np.random.rand(5, 10)
     index.add_vector(new_vector_2)
 
-
-    assert len(index)==16==len(index.embeddings)
-
-
-
-    
-
-
+    assert len(index) == 16 == len(index.embeddings)
