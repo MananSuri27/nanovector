@@ -19,6 +19,9 @@ class Index(AbstractIndex):
         self.normalise = normalise
 
     def add_vector(self, vector: np.array):
+        if len(vector.shape) == 1:
+            vector = vector.reshape(1, self.dimension)
+
         if vector.shape[1] != self.dimension:
             raise ValueError(
                 f"Expected vector of dimension {self.dimension} but got {len(vector)}"

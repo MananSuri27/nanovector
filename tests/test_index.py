@@ -287,6 +287,8 @@ def test_add():
 
     index = Index(embeddings, dimension)
 
+    # Valid additions
+
     new_vector_1 = np.random.rand(1, 10)
 
     index.add_vector(new_vector_1)
@@ -297,3 +299,31 @@ def test_add():
     index.add_vector(new_vector_2)
 
     assert len(index) == 16 == len(index.embeddings)
+
+    new_vector_3 = np.random.rand(10)
+    index.add_vector(new_vector_3)
+
+    assert len(index) == 17 == len(index.embeddings)
+
+    # Invalid additions
+
+    new_vector_4 = np.random.rand(1, 11)
+
+    with pytest.raises(ValueError) as exc_info:
+        index.add_vector(new_vector_4)
+
+    assert (
+        str(exc_info.value)
+        == f"Expected vector of dimension {dimension} but got {len(new_vector_4)}"
+    )
+
+    new_vector_5 = np.random.rand(20)
+
+    with pytest.raises(ValueError) as exc_info:
+
+        index.add_vector(new_vector_5)
+
+    assert (
+        str(exc_info.value)
+        == f"Expected vector of dimension {dimension} but got {len(new_vector_5)}"
+    )
