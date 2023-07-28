@@ -314,7 +314,7 @@ def test_add():
 
     assert (
         str(exc_info.value)
-        == f"Expected vector of dimension {dimension} but got {len(new_vector_4)}"
+        == f"Expected vector of dimension {dimension} but got {new_vector_4.shape[1]}"
     )
 
     new_vector_5 = np.random.rand(20)
@@ -327,3 +327,25 @@ def test_add():
         str(exc_info.value)
         == f"Expected vector of dimension {dimension} but got {len(new_vector_5)}"
     )
+
+
+def test_query():
+    embeddings = np.random.rand(10, 10)
+    dimension = 10
+
+    query_1 = embeddings[0]
+    query_2 = embeddings[:5]
+    query_3 = np.random.rand(10)
+    query_4 = np.random.rand(2, 11)
+    query_5 = np.random.rand(11)
+
+    index = Index(embeddings, dimension)
+
+    # query 1: ideal
+    k = 3
+    res1, ans1 = index.get_similarity(query_1, k)
+    assert len(res1) == k
+    assert ans1.shape[0] == k
+    assert ans1.shape[1] == dimension 
+
+    
