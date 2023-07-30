@@ -330,15 +330,13 @@ def test_add():
 
 
 def test_query():
-    embeddings = np.random.rand(10, 10)
+    embeddings = np.random.rand(11, 10)
     dimension = 10
 
     query_1 = embeddings[0]
     query_2 = embeddings[:5]
     query_3 = np.random.rand(1, 10)
-    query_3 = np.random.rand(1, 10)
-    query_4 = np.random.rand(2, 11)
-    query_5 = np.random.rand(11)
+    query_4 = np.random.rand(11)
 
     index = Index(embeddings, dimension)
 
@@ -351,4 +349,55 @@ def test_query():
     assert ans1.shape[1] == dimension
 
     # query 2: not supported
-    # query
+
+    with pytest.raises(NotImplementedError) as exc_info:
+        index.get_similarity(query_2, k)
+
+    assert str(exc_info.value) == "Multi vector query not supported yet."
+
+    # query 3: ideal but dimensionally different
+
+    k = 1
+    res3, ans3 = index.get_similarity(query_3, k)
+    assert len(res3) == k
+    assert len(res3.shape) == 1
+    assert ans3.shape[0] == k
+    assert ans3.shape[1] == dimension
+
+    # query 4: not compatible
+
+    with pytest.raises(ValueError) as exc_info:
+        index.get_similarity(query_4, k)
+    
+    assert str(exc_info.value)== f"Expected vector of dimension {dimension} but got {query_4.shape[0]}"
+
+    # check k = 0
+
+    k = 0
+    res1, ans1 = index.get_similarity(query_1, k)
+    assert len(res1) == k
+    assert len(res1.shape) == 1
+    assert ans1.shape[0] == k
+    assert ans1.shape[1] == dimension
+
+    # check k<0
+
+    k = -20
+
+    with pytest.raises(ValueError) as exc_info:
+        index.get_similarity(query_1, k)
+    
+    assert str(exc_info.value)== f"Expected k>0 got k={k}"
+
+    # check k>len(index)
+
+    k = 12
+    res1, ans1 = index.get_similarity(query_1, k)
+    assert len(res1) == len(index)
+    assert len(res1.shape) == 1
+    assert ans1.shape[0] == len(index)
+    assert ans1.shape[1] == dimension
+
+
+
+
