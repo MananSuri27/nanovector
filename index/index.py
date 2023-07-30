@@ -40,9 +40,11 @@ class Index(AbstractIndex):
             and query_vector.shape[1] == self.dimension
             and len(query_vector) == 1
         ):
-            query_vector = query_vector.reshape(self.dimension,)
+            query_vector = query_vector.reshape(
+                self.dimension,
+            )
         elif len(query_vector.shape) > 1:
-            raise NotImplementedError("Multi vector query not supported yet.")      
+            raise NotImplementedError("Multi vector query not supported yet.")
         elif query_vector.shape[0] != self.dimension:
             raise ValueError(
                 f"Expected vector of dimension {self.dimension} but got {query_vector.shape[0]}"

@@ -335,8 +335,8 @@ def test_query():
 
     query_1 = embeddings[0]
     query_2 = embeddings[:5]
-    query_3 = np.random.rand(1,10)
-    query_3 = np.random.rand(1,10)
+    query_3 = np.random.rand(1, 10)
+    query_3 = np.random.rand(1, 10)
     query_4 = np.random.rand(2, 11)
     query_5 = np.random.rand(11)
 
@@ -346,12 +346,9 @@ def test_query():
     k = 3
     res1, ans1 = index.get_similarity(query_1, k)
     assert len(res1) == k
-    assert len(res1.shape)==1
+    assert len(res1.shape) == 1
     assert ans1.shape[0] == k
-    assert ans1.shape[1] == dimension 
-
+    assert ans1.shape[1] == dimension
 
     # query 2: not supported
-    # query    
-
-    
+    # query
