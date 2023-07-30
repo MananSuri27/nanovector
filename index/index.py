@@ -35,20 +35,17 @@ class Index(AbstractIndex):
         self.num_vectors = self.num_vectors + vector.shape[0]
 
     def get_similarity(self, query_vector: np.array, k: int):
-
-        print(query_vector.shape)
         if (
             len(query_vector.shape) == 2
-            and len(query_vector[1]) == self.dimension
+            and query_vector.shape[1] == self.dimension
             and len(query_vector) == 1
         ):
-            query_vector = query_vector.reshape(1, -1)
+            query_vector = query_vector.reshape(self.dimension,)
         elif len(query_vector.shape) > 1:
-            raise NotImplementedError("Multi vector query not supported yet.")
-        
-        if query_vector.shape[0] != self.dimension:
+            raise NotImplementedError("Multi vector query not supported yet.")      
+        elif query_vector.shape[0] != self.dimension:
             raise ValueError(
-                f"Expected vector of dimension {self.dimension} but got {query_vector.shape[1]}"
+                f"Expected vector of dimension {self.dimension} but got {query_vector.shape[0]}"
             )
 
         # Determine the actual number of neighbors based on the available vectors
