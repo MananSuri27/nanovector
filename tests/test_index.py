@@ -368,8 +368,11 @@ def test_query():
 
     with pytest.raises(ValueError) as exc_info:
         index.get_similarity(query_4, k)
-    
-    assert str(exc_info.value)== f"Expected vector of dimension {dimension} but got {query_4.shape[0]}"
+
+    assert (
+        str(exc_info.value)
+        == f"Expected vector of dimension {dimension} but got {query_4.shape[0]}"
+    )
 
     # check k = 0
 
@@ -386,8 +389,8 @@ def test_query():
 
     with pytest.raises(ValueError) as exc_info:
         index.get_similarity(query_1, k)
-    
-    assert str(exc_info.value)== f"Expected k>0 got k={k}"
+
+    assert str(exc_info.value) == f"Expected k>0 got k={k}"
 
     # check k>len(index)
 
@@ -397,7 +400,3 @@ def test_query():
     assert len(res1.shape) == 1
     assert ans1.shape[0] == len(index)
     assert ans1.shape[1] == dimension
-
-
-
-

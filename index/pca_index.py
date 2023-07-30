@@ -46,18 +46,6 @@ class PCAIndex(AbstractIndex):
         self.embeddings = np.vstack([self.embeddings, vector])
         self.num_vectors = self.num_vectors + 1
 
-    def get_similarity(self, query: np.array, k: int):
-        k = k if k <= self.num_vectors else self.num_vectors
-
-        query = query if not self.normalise else normalise_embeddings(query)
-        query = self.PCA.transform(query)
-        scores = np.dot(query, self.embeddings.T)
-        top_k_indices = np.argpartition(-scores, kth=k)[:k]
-        top_k_indices_sorted = top_k_indices[np.argsort(top_k_indices)]
-        top_k_embeddings = self.embeddings[top_k_indices_sorted]
-
-        return top_k_indices_sorted, top_k_embeddings
-    
     def get_similarity(self, query_vector: np.array, k: int):
 
         if k < 0:
@@ -90,15 +78,13 @@ class PCAIndex(AbstractIndex):
         # Compute the dot product (similarity scores) between the normalized query and all embeddings
         similarity_scores = np.dot(query, self.embeddings.T)
 
-
-        if num_neighbors!=self.num_vectors:
+        if num_neighbors != self.num_vectors:
             # Get the indices of the top k similarity scores using argpartition
             top_k_indices = np.argpartition(-similarity_scores, kth=num_neighbors)[
                 :num_neighbors
             ]
         else:
             top_k_indices = np.argsort(-similarity_scores)
-
 
         # Sort the indices in ascending order (to preserve the original order)
         top_k_indices_sorted = top_k_indices[np.argsort(top_k_indices)]

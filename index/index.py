@@ -64,15 +64,13 @@ class Index(AbstractIndex):
         # Compute the dot product (similarity scores) between the normalized query and all embeddings
         similarity_scores = np.dot(normalized_query, self.embeddings.T)
 
-
-        if num_neighbors!=self.num_vectors:
+        if num_neighbors != self.num_vectors:
             # Get the indices of the top k similarity scores using argpartition
             top_k_indices = np.argpartition(-similarity_scores, kth=num_neighbors)[
                 :num_neighbors
             ]
         else:
             top_k_indices = np.argsort(-similarity_scores)
-
 
         # Sort the indices in ascending order (to preserve the original order)
         top_k_indices_sorted = top_k_indices[np.argsort(top_k_indices)]
