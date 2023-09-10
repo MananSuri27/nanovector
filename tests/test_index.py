@@ -348,8 +348,6 @@ def test_query():
     assert ans1.shape[0] == k
     assert ans1.shape[1] == dimension
 
-    
-
     # query 3: ideal but dimensionally different
 
     k = 1

@@ -92,3 +92,38 @@ class VectorTable:
 
     def __repr__(self) -> str:
         return f"VectorTable(uuid={self.uuid}, created_at={self.created_at}, last_queried_at={self.last_queried_at}, table_name={self.table_name}, table_description={self.description}, config={self.config})"
+
+    def add_vector(self, vector: np.array):
+        """
+        Add a vector to the vector table.
+
+        Args:
+            vector (np.array): The vector to be added to the table.
+
+        Note:
+            This method delegates the addition of the vector to the underlying index.
+
+        Example:
+            table = VectorTable(table_name="my_table", config=config, embeddings=embeddings)
+            vector = np.random.rand(1, config.dim_input)
+            table.add_vector(vector)
+        """
+        self._index.add_vector(vector)
+
+    def query(self, query_vector: np.array, k: int = 1):
+        """
+        Perform a similarity query on the vector table.
+
+        Args:
+            query_vector (np.array): The query vector for similarity search.
+            k (int, optional): The number of similar vectors to retrieve (default is 1).
+
+        Returns:
+            tuple: A tuple containing two arrays: top-k indices and top-k embeddings.
+
+        Example:
+            table = VectorTable(table_name="my_table", config=config, embeddings=embeddings)
+            query_vector = np.random.rand(1, config.dim_input)
+            top_k_indices, top_k_embeddings = table.query(query_vector, k=10)
+        """
+        return self._index.get_similarity(query_vector, k)

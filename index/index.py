@@ -2,6 +2,7 @@ import numpy as np
 from index.abstract_index import AbstractIndex
 from utils.utils import normalise_embeddings
 
+
 class Index(AbstractIndex):
     """
     A class representing an index for vector search.

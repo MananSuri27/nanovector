@@ -64,13 +64,12 @@ class AbstractIndex(ABC):
         return self.num_vectors
 
     @abstractmethod
-    def add_vector(self, embedding):
+    def add_vector(self, vector):
         """
         Add a vector to the index.
 
         Args:
-            id: The identifier for the vector.
-            embedding: The vector to be added to the index.
+            vector: The vector to be added to the index.
 
         Raises:
             NotImplementedError: This method must be implemented by subclasses.
@@ -87,7 +86,7 @@ class AbstractIndex(ABC):
             k (int): The number of similar vectors to retrieve.
 
         Returns:
-            list: A list of (id, similarity) tuples representing the top-k similar vectors.
+            tuple: A tuple containing two arrays: top-k indices and top-k embeddings.
 
         Raises:
             NotImplementedError: This method must be implemented by subclasses.
