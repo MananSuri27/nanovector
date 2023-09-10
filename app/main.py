@@ -9,6 +9,27 @@ app = Flask(__name__)
 
 tables = VectorDB()
 
+def check_table_exists(route_function):
+    def wrapper(table, *args, **kwargs):
+        if table not in tables:
+            return jsonify(message="Table not found"), 404
+        return route_function(table, *args, **kwargs)
+    return wrapper
+
+def load_data_from_json(data, variable):
+    """
+    Load data from the 'data' dictionary based on the 'variable' name and its corresponding '_path' key.
+    If '{variable}_path' is provided and exists in 'data', load data from the path.
+    If 'variable' is provided and exists in 'data', load data from '{variable}'.
+    """
+    if f"{variable}_path" is not None and f"{variable}_path" in data:
+        return np.load(f"{variable}_path")
+    elif variable is not None and variable in data:
+        if not isinstance(data[variable], np.array):
+            raise ValueError(variable)
+        return data[variable]
+    else:
+        return None
 
 @app.route("/create", methods=["POST"])
 def create_table():
@@ -20,19 +41,11 @@ def create_table():
     embeddings_path = data.get("path", None)  # Use default value None if "path" is not provided
     embeddings = data.get("embeddings", None)  # Use default value None if "embeddings" is not provided
 
-    # Check if both embeddings_path and embeddings are None
-    if embeddings_path is None and embeddings is None:
-        return jsonify(message="Both 'embeddings_path' and 'embeddings' are missing"), 400
 
-    # If both embeddings_path and embeddings are provided, log a warning
     if embeddings_path is not None and embeddings is not None:
         app.logger.warning("Both 'embeddings_path' and 'embeddings' provided; 'embeddings_path' will be used.")
 
-    # Load embeddings from the specified path if embeddings is not provided
-    if embeddings is None:
-        if embeddings_path is None:
-            return jsonify(message="'embeddings' or 'embeddings_path' must be provided"), 400
-        embeddings = np.load(embeddings_path)
+    embeddings = load_data_from_json(data, "embeddings")
 
     # Check if embeddings has exactly 2 dimensions
     if len(embeddings.shape) != 2:
@@ -56,58 +69,70 @@ def create_table():
 
 
 @app.route("/<table>/details", methods=["GET"])
+@check_table_exists
 def table_details(table):
-    if table not in tables:
-        return jsonify(message="Table not found"), 404
-
-
-    table_details = tables.get_table(table)
-    return jsonify(table_data), 200
+    table= tables.get_table(table)
+    return jsonify(str(table)), 200
 
 
 @app.route("/<table>/delete", methods=["DELETE"])
+@check_table_exists
 def delete_table(table):
-    if table not in tables:
-        return jsonify(message="Table not found"), 404
-
-    # Looks good
-
-    del tables[table]
+    del tables.delete_table(table)
     return jsonify(message=f"Table {table} deleted successfully"), 200
 
 
 @app.route("/<table>/add", methods=["POST"])
+@check_table_exists
 def add_to_table(table):
-    if table not in tables:
-        return jsonify(message="Table not found"), 404
-
-    # check if row can be added
 
     data = request.get_json()
-    tables[table].append(data)
+
+    vector = data.get("vector", None)
+    vector_path = data.get("vector_path", None)
+
+    if vector_path is not None and vector is not None:
+        app.logger.warning("Both 'vector_path' and 'vector' provided; 'vector_path' will be used.")
+
+    vector = load_data_from_json(data, "vector")
+
+    tables.add_vector(table, vector)
+
     return jsonify(message="Row added successfully"), 201
 
 
 @app.route("/<table>/query", methods=["POST"])
+@check_table_exists
 def query_table(table):
     if table not in tables:
         return jsonify(message="Table not found"), 404
 
-    query = request.get_json()
+    data = request.get_json()
+    
+    k = data.get("k", 1)
 
-    #  rework whole thing
-    filtered_data = [
-        row
-        for row in tables[table]
-        if all(row.get(key) == value for key, value in query.items())
-    ]
-    return jsonify(filtered_data), 200
+    query_vector = data.get("query_vector", None)
+    query_vector_path = data.get("query_vector_path", None)
+
+    if query_vector_path is not None and query_vector is not None:
+        app.logger.warning("Both 'query_vector_path' and 'query_vector' provided; 'query_vector_path' will be used.")
+
+    query_vector = load_data_from_json(data, "query_vector")
+
+    top_k_indices_sorted, top_k_embeddings = tables.query(table, query_vector, k)
+
+    results = {
+        "top_k_indices_sorted": top_k_indices_sorted.tolist(),
+        "top_k_embeddings": top_k_embeddings,
+    }
+
+    return jsonify(results), 200
 
 
 @app.route("/list_tables", methods=["GET"])
 def list_tables():
     # works: do we also want to save timestamp?
-    return jsonify(list(tables.keys())), 200
+    return jsonify(tables.list_tables()), 200
 
 
 @app.errorhandler(400)
