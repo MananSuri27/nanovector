@@ -64,7 +64,7 @@ class AbstractIndex(ABC):
         return self.num_vectors
 
     @abstractmethod
-    def add_vector(self, id, embedding):
+    def add_vector(self, embedding):
         """
         Add a vector to the index.
 
