@@ -1,11 +1,39 @@
 import numpy as np
-
 from index.abstract_index import AbstractIndex
 from utils.utils import normalise_embeddings
 
-
 class Index(AbstractIndex):
+    """
+    A class representing an index for vector search.
+
+    Attributes:
+        embeddings (np.array): The array of embeddings indexed in the table.
+        dimension (int): The dimensionality of the embeddings.
+        normalise (bool): Whether the embeddings are normalized.
+
+    Methods:
+        add_vector(vector): Add a vector to the index.
+        get_similarity(query_vector, k): Retrieve the top-k similar vectors to a query vector.
+
+    Example:
+        embeddings = np.random.rand(100, 256)
+        index = Index(embeddings, dimension=256, normalise=False)
+        query = np.random.rand(1, 256)
+        indices, top_k_vectors = index.get_similarity(query, k=10)
+    """
+
     def __init__(self, embeddings: np.array, dimension: int, normalise=False):
+        """
+        Initialize an Index instance.
+
+        Args:
+            embeddings (np.array): The array of embeddings indexed in the table.
+            dimension (int): The dimensionality of the embeddings.
+            normalise (bool, optional): Whether the embeddings are normalized (default is False).
+
+        Raises:
+            ValueError: If the shape of embeddings is not compatible with the specified dimension.
+        """
         super().__init__(len(embeddings), dimension)
         if embeddings.shape[1] != dimension:
             raise ValueError(
@@ -19,6 +47,15 @@ class Index(AbstractIndex):
         self.normalise = normalise
 
     def add_vector(self, vector: np.array):
+        """
+        Add a vector to the index.
+
+        Args:
+            vector (np.array): The vector to be added to the index.
+
+        Raises:
+            ValueError: If the shape of the provided vector is not compatible with the index dimension.
+        """
         if len(vector.shape) == 1 and len(vector) == self.dimension:
             vector = vector.reshape(1, self.dimension)
         elif len(vector.shape) == 1:
@@ -35,7 +72,20 @@ class Index(AbstractIndex):
         self.num_vectors = self.num_vectors + vector.shape[0]
 
     def get_similarity(self, query_vector: np.array, k: int):
+        """
+        Retrieve the top-k similar vectors to a query vector.
 
+        Args:
+            query_vector (np.array): The query vector for similarity search.
+            k (int): The number of similar vectors to retrieve.
+
+        Returns:
+            tuple: A tuple containing two arrays: top-k indices and top-k embeddings.
+
+        Raises:
+            ValueError: If k is less than zero or the shape of the query vector is not compatible with the index dimension.
+            NotImplementedError: If multi-vector queries are not supported.
+        """
         if k < 0:
             raise ValueError(f"Expected k>0 got k={k}")
         if (
@@ -47,7 +97,7 @@ class Index(AbstractIndex):
                 self.dimension,
             )
         elif len(query_vector.shape) > 1:
-            raise NotImplementedError("Multi vector query not supported yet.")
+            raise NotImplementedError("Multi-vector query not supported yet.")
         elif query_vector.shape[0] != self.dimension:
             raise ValueError(
                 f"Expected vector of dimension {self.dimension} but got {query_vector.shape[0]}"

@@ -348,12 +348,7 @@ def test_query():
     assert ans1.shape[0] == k
     assert ans1.shape[1] == dimension
 
-    # query 2: not supported
-
-    with pytest.raises(NotImplementedError) as exc_info:
-        index.get_similarity(query_2, k)
-
-    assert str(exc_info.value) == "Multi vector query not supported yet."
+    
 
     # query 3: ideal but dimensionally different
 
@@ -400,3 +395,10 @@ def test_query():
     assert len(res1.shape) == 1
     assert ans1.shape[0] == len(index)
     assert ans1.shape[1] == dimension
+
+    # query 2: not supported
+
+    with pytest.raises(NotImplementedError) as exc_info:
+        index.get_similarity(query_2, k)
+
+    assert str(exc_info.value) == "Multi vector query not supported yet."
