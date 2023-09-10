@@ -1,25 +1,58 @@
 from flask import Flask, jsonify, request
+import numpy as np
 
 from tables.db import VectorDB
 from tables.table import VectorTable
 
+from utils.config import IndexConfig
 app = Flask(__name__)
 
-# Dictionary to store tables
-tables = {}
+tables = VectorDB()
 
 
 @app.route("/create", methods=["POST"])
 def create_table():
     data = request.get_json()
+
+    # Extract table creation parameters from JSON data
     table_name = data.get("table_name")
+    description = data.get("description", None)  # Use default value None if "description" is not provided
+    embeddings_path = data.get("path", None)  # Use default value None if "path" is not provided
+    embeddings = data.get("embeddings", None)  # Use default value None if "embeddings" is not provided
 
-    if not table_name or table_name in tables:
-        return jsonify(message="Invalid table name or table already exists"), 400
+    # Check if both embeddings_path and embeddings are None
+    if embeddings_path is None and embeddings is None:
+        return jsonify(message="Both 'embeddings_path' and 'embeddings' are missing"), 400
 
-    # create table here
-    tables[table_name] = []
-    return jsonify(message=f"Table {table_name} created successfully"), 201
+    # If both embeddings_path and embeddings are provided, log a warning
+    if embeddings_path is not None and embeddings is not None:
+        app.logger.warning("Both 'embeddings_path' and 'embeddings' provided; 'embeddings_path' will be used.")
+
+    # Load embeddings from the specified path if embeddings is not provided
+    if embeddings is None:
+        if embeddings_path is None:
+            return jsonify(message="'embeddings' or 'embeddings_path' must be provided"), 400
+        embeddings = np.load(embeddings_path)
+
+    # Check if embeddings has exactly 2 dimensions
+    if len(embeddings.shape) != 2:
+        return jsonify(message="Embeddings must have exactly 2 dimensions"), 400
+
+    # Extract other configuration parameters
+    pca = data.get("pca", False)  # Use default value False if "pca" is not provided
+    normalise = data.get("normalise", True)  # Use default value True if "normalise" is not provided
+    dim_input = embeddings.shape[1]
+    dim_final = data.get("dim_final", dim_input)  # Use dim_input as default if "dim_final" is not provided
+
+
+    # Create an IndexConfig object with specified configuration
+    config = IndexConfig(dim_input, dim_final, pca, normalise)
+
+    # Create a VectorTable and add it to the database
+    table = VectorTable(table_name, config, embeddings, description)
+    tables.add_table(table)
+
+    return jsonify(message=f"Table '{table_name}' created successfully"), 201
 
 
 @app.route("/<table>/details", methods=["GET"])
@@ -27,9 +60,8 @@ def table_details(table):
     if table not in tables:
         return jsonify(message="Table not found"), 404
 
-    # Get details such as number of rows, type etc
 
-    table_data = tables[table]
+    table_details = tables.get_table(table)
     return jsonify(table_data), 200
 
 
