@@ -18,8 +18,8 @@ class PCAIndex(AbstractIndex):
             raise ValueError(
                 f"Expected embeddings of dimension {dimension_input} but got {embeddings.shape[1]}"
             )
-        
-        if dimension_input<dimension_final:
+
+        if dimension_input < dimension_final:
             raise ValueError(
                 f"PCAIndex expects final dimensions to be less than input dimension but {dimension_input} < {dimension_final}."
             )
