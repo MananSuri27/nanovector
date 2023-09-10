@@ -1,10 +1,11 @@
 import uuid
 from datetime import datetime
+
 import numpy as np
 
 from index.abstract_index import AbstractIndex
-from utils.initialise_index import initialise_index
 from utils.config import IndexConfig
+from utils.initialise_index import initialise_index
 
 
 class VectorTable:

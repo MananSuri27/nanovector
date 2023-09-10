@@ -1,8 +1,6 @@
+from datetime import datetime
+
 from table import VectorTable
-from datetime import datetime
-
-
-from datetime import datetime
 
 
 class VectorDB:
