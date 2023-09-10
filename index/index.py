@@ -9,7 +9,7 @@ class Index(AbstractIndex):
     Attributes:
         embeddings (np.array): The array of embeddings indexed in the table.
         dimension (int): The dimensionality of the embeddings.
-        normalise (bool): Whether the embeddings are normalized.
+        normalise (bool): Whether the embeddings are to be normalized.
 
     Methods:
         add_vector(vector): Add a vector to the index.
@@ -29,7 +29,7 @@ class Index(AbstractIndex):
         Args:
             embeddings (np.array): The array of embeddings indexed in the table.
             dimension (int): The dimensionality of the embeddings.
-            normalise (bool, optional): Whether the embeddings are normalized (default is False).
+            normalise (bool, optional): Whether the embeddings are to be normalized (default is False).
 
         Raises:
             ValueError: If the shape of embeddings is not compatible with the specified dimension.
