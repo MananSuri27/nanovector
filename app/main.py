@@ -1,5 +1,8 @@
 from flask import Flask, jsonify, request
 
+from tables.db import VectorDB
+from tables.table import VectorTable
+
 app = Flask(__name__)
 
 # Dictionary to store tables

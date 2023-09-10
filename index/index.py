@@ -1,4 +1,5 @@
 import numpy as np
+
 from index.abstract_index import AbstractIndex
 from utils.utils import normalise_embeddings
 
