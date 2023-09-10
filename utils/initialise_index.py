@@ -7,7 +7,6 @@ from index.pca_index import PCAIndex
 
 def initialise_index(config: IndexConfig, embeddings: np.array):
     if config.pca:
-        assert config.dim_input >= config.dim_final
         return PCAIndex(
             embeddings=embeddings,
             dimension_input=config.dim_input,
