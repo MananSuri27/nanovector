@@ -280,32 +280,43 @@ def test_initialisation():
     assert np.allclose(index.embeddings, embeddings_normalised)
 
 
-def test_add():
-
+def test_add_valid_single_vector():
     dimension = 10
     embeddings = np.random.rand(10, 10)
-
     index = Index(embeddings, dimension)
 
-    # Valid additions
-
     new_vector_1 = np.random.rand(1, 10)
-
     index.add_vector(new_vector_1)
+    
+    assert len(index) == 11
+    assert len(index.embeddings) == 11
 
-    assert len(index) == 11 == len(index.embeddings)
+def test_add_valid_multiple_vectors():
+    dimension = 10
+    embeddings = np.random.rand(10, 10)
+    index = Index(embeddings, dimension)
 
     new_vector_2 = np.random.rand(5, 10)
     index.add_vector(new_vector_2)
 
-    assert len(index) == 16 == len(index.embeddings)
+    assert len(index) == 15
+    assert len(index.embeddings) == 15
+
+def test_add_valid_vector_with_different_dimension():
+    dimension = 10
+    embeddings = np.random.rand(10, 10)
+    index = Index(embeddings, dimension)
 
     new_vector_3 = np.random.rand(10)
     index.add_vector(new_vector_3)
 
-    assert len(index) == 17 == len(index.embeddings)
+    assert len(index) == 11
+    assert len(index.embeddings) == 11
 
-    # Invalid additions
+def test_add_invalid_vector_dimension_mismatch():
+    dimension = 10
+    embeddings = np.random.rand(10, 10)
+    index = Index(embeddings, dimension)
 
     new_vector_4 = np.random.rand(1, 11)
 
@@ -317,10 +328,14 @@ def test_add():
         == f"Expected vector of dimension {dimension} but got {new_vector_4.shape[1]}"
     )
 
+def test_add_invalid_vector_dimension_too_large():
+    dimension = 10
+    embeddings = np.random.rand(10, 10)
+    index = Index(embeddings, dimension)
+
     new_vector_5 = np.random.rand(20)
 
     with pytest.raises(ValueError) as exc_info:
-
         index.add_vector(new_vector_5)
 
     assert (
@@ -329,18 +344,14 @@ def test_add():
     )
 
 
-def test_query():
+
+def test_query_ideal_case():
     embeddings = np.random.rand(11, 10)
     dimension = 10
 
     query_1 = embeddings[0]
-    query_2 = embeddings[:5]
-    query_3 = np.random.rand(1, 10)
-    query_4 = np.random.rand(11)
-
     index = Index(embeddings, dimension)
 
-    # query 1: ideal
     k = 3
     res1, ans1 = index.get_similarity(query_1, k)
     assert len(res1) == k
@@ -348,7 +359,25 @@ def test_query():
     assert ans1.shape[0] == k
     assert ans1.shape[1] == dimension
 
-    # query 3: ideal but dimensionally different
+def test_query_multi_vector():
+    embeddings = np.random.rand(11, 10)
+    dimension = 10
+
+    query_2 = embeddings[:5]
+    index = Index(embeddings, dimension)
+
+    k = 3
+    with pytest.raises(NotImplementedError) as exc_info:
+        index.get_similarity(query_2, k)
+
+    assert str(exc_info.value) == "Multi-vector query not supported yet."
+
+def test_query_dimension_mismatch():
+    embeddings = np.random.rand(11, 10)
+    dimension = 10
+
+    query_3 = np.random.rand(1, 10)
+    index = Index(embeddings, dimension)
 
     k = 1
     res3, ans3 = index.get_similarity(query_3, k)
@@ -357,8 +386,14 @@ def test_query():
     assert ans3.shape[0] == k
     assert ans3.shape[1] == dimension
 
-    # query 4: not compatible
+def test_query_incompatible_vector():
+    embeddings = np.random.rand(11, 10)
+    dimension = 10
 
+    query_4 = np.random.rand(11)
+    index = Index(embeddings, dimension)
+
+    k = 1
     with pytest.raises(ValueError) as exc_info:
         index.get_similarity(query_4, k)
 
@@ -367,7 +402,12 @@ def test_query():
         == f"Expected vector of dimension {dimension} but got {query_4.shape[0]}"
     )
 
-    # check k = 0
+def test_query_k_zero():
+    embeddings = np.random.rand(11, 10)
+    dimension = 10
+
+    query_1 = embeddings[0]
+    index = Index(embeddings, dimension)
 
     k = 0
     res1, ans1 = index.get_similarity(query_1, k)
@@ -376,16 +416,25 @@ def test_query():
     assert ans1.shape[0] == k
     assert ans1.shape[1] == dimension
 
-    # check k<0
+def test_query_k_negative():
+    embeddings = np.random.rand(11, 10)
+    dimension = 10
+
+    query_1 = embeddings[0]
+    index = Index(embeddings, dimension)
 
     k = -20
-
     with pytest.raises(ValueError) as exc_info:
         index.get_similarity(query_1, k)
 
     assert str(exc_info.value) == f"Expected k>0 got k={k}"
 
-    # check k>len(index)
+def test_query_k_greater_than_index_length():
+    embeddings = np.random.rand(11, 10)
+    dimension = 10
+
+    query_1 = embeddings[0]
+    index = Index(embeddings, dimension)
 
     k = 12
     res1, ans1 = index.get_similarity(query_1, k)
@@ -393,10 +442,3 @@ def test_query():
     assert len(res1.shape) == 1
     assert ans1.shape[0] == len(index)
     assert ans1.shape[1] == dimension
-
-    # query 2: not supported
-
-    with pytest.raises(NotImplementedError) as exc_info:
-        index.get_similarity(query_2, k)
-
-    assert str(exc_info.value) == "Multi vector query not supported yet."

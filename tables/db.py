@@ -31,11 +31,9 @@ class VectorDB:
         """
         self.created_at = datetime.utcnow()
         self._tables = {}
+
     
-    @property
-    def tables(self):
-        return self._tables
-    
+
     def get_table(self, table_name: str):
         """
         Get a table with desired table name
@@ -48,8 +46,12 @@ class VectorDB:
         """
         if table_name not in self._tables.keys():
             raise ValueError(f"Table {table_name} doesn't exist in the database.")
-        
+
         return self._tables[table_name]
+    
+    @property
+    def tables(self):
+        return self._tables
 
     def add_table(self, table: VectorTable):
         """
@@ -102,7 +104,6 @@ class VectorDB:
 
         del self.tables[table_name]
 
-
     def add_vector(self, table_name: str, vector: np.array):
         """
         Add a vector to a specified table.
@@ -122,7 +123,6 @@ class VectorDB:
         """
         self.check_table(table_name)
         self._tables[table_name].add_vector(vector)
-
 
     def query(self, table_name: str, query_vector: np.array, k: int = 1):
         """
@@ -148,7 +148,6 @@ class VectorDB:
         self.check_table(table_name)
         return self._tables[table_name].query(query_vector, k)
 
-    
     def check_table(self, table_name: str):
         """
         Check if a specified table exists in the database.
@@ -171,7 +170,6 @@ class VectorDB:
         if table_name not in self._tables.keys():
             raise ValueError(f"Table '{table_name}' doesn't exist in the database.")
         return True
-
 
     def __len__(self):
         """

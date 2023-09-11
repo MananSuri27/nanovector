@@ -5,17 +5,21 @@ from tables.db import VectorDB
 from tables.table import VectorTable
 
 from utils.config import IndexConfig
+
 app = Flask(__name__)
 
 tables = VectorDB()
 
+
 def check_table_exists(route_function):
     def wrapper(table, *args, **kwargs):
-        if table not in tables:
+        if not tables.check_table(table):
             return jsonify(message="Table not found"), 404
         return route_function(table, *args, **kwargs)
+
     wrapper.__name__ = route_function.__name__
     return wrapper
+
 
 def load_data_from_json(data, variable):
     """
@@ -30,18 +34,21 @@ def load_data_from_json(data, variable):
     else:
         return None
 
+
 @app.route("/create", methods=["POST"])
 def create_table():
     data = request.get_json()
 
     # Extract table creation parameters from JSON data
     table_name = data.get("table_name")
-    description = data.get("description", None)  
-    embeddings_path = data.get("embeddings_path", None) 
-    embeddings = data.get("embeddings", None)  
+    description = data.get("description", None)
+    embeddings_path = data.get("embeddings_path", None)
+    embeddings = data.get("embeddings", None)
 
     if embeddings_path is not None and embeddings is not None:
-        app.logger.warning("Both 'embeddings_path' and 'embeddings' provided; 'embeddings_path' will be used.")
+        app.logger.warning(
+            "Both 'embeddings_path' and 'embeddings' provided; 'embeddings_path' will be used."
+        )
 
     embeddings = load_data_from_json(data, "embeddings")
 
@@ -50,11 +57,10 @@ def create_table():
         return jsonify(message="Embeddings must have exactly 2 dimensions"), 400
 
     # Extract other configuration parameters
-    pca = data.get("pca", False) 
-    normalise = data.get("normalise", True) 
+    pca = data.get("pca", False)
+    normalise = data.get("normalise", True)
     dim_input = embeddings.shape[1]
-    dim_final = data.get("dim_final", dim_input)  
-
+    dim_final = data.get("dim_final", dim_input)
 
     # Create an IndexConfig object with specified configuration
     config = IndexConfig(dim_input, dim_final, pca, normalise)
@@ -69,7 +75,7 @@ def create_table():
 @app.route("/<table>/details", methods=["GET"])
 @check_table_exists
 def table_details(table):
-    table= tables.get_table(table)
+    table = tables.get_table(table)
     return jsonify(str(table)), 200
 
 
@@ -90,7 +96,9 @@ def add_to_table(table):
     vector_path = data.get("vector_path", None)
 
     if vector_path is not None and vector is not None:
-        app.logger.warning("Both 'vector_path' and 'vector' provided; 'vector_path' will be used.")
+        app.logger.warning(
+            "Both 'vector_path' and 'vector' provided; 'vector_path' will be used."
+        )
 
     vector = load_data_from_json(data, "vector")
 
@@ -102,18 +110,18 @@ def add_to_table(table):
 @app.route("/<table>/query", methods=["POST"])
 @check_table_exists
 def query_table(table):
-    if table not in tables:
-        return jsonify(message="Table not found"), 404
-
     data = request.get_json()
-    
+
     k = data.get("k", 1)
+    k = int(k)
 
     query_vector = data.get("query_vector", None)
     query_vector_path = data.get("query_vector_path", None)
 
     if query_vector_path is not None and query_vector is not None:
-        app.logger.warning("Both 'query_vector_path' and 'query_vector' provided; 'query_vector_path' will be used.")
+        app.logger.warning(
+            "Both 'query_vector_path' and 'query_vector' provided; 'query_vector_path' will be used."
+        )
 
     query_vector = load_data_from_json(data, "query_vector")
 
@@ -121,7 +129,7 @@ def query_table(table):
 
     results = {
         "top_k_indices_sorted": top_k_indices_sorted.tolist(),
-        "top_k_embeddings": top_k_embeddings,
+        "top_k_embeddings": top_k_embeddings.tolist(),
     }
 
     return jsonify(results), 200

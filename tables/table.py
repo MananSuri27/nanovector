@@ -92,7 +92,7 @@ class VectorTable:
 
     def __repr__(self) -> str:
         return f"VectorTable(uuid={self.uuid}, created_at={self.created_at}, last_queried_at={self.last_queried_at}, table_name={self.table_name}, table_description={self.description}, config={self.config}, num_rows ={len(self.index)})"
-    
+
     def __str__(self) -> str:
         return f"VectorTable(uuid={self.uuid}, created_at={self.created_at}, last_queried_at={self.last_queried_at}, table_name={self.table_name}, table_description={self.description}, config={self.config}, num_rows ={len(self.index)})"
 
