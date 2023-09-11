@@ -1,5 +1,5 @@
 import numpy as np
-from config import IndexConfig
+from utils.config import IndexConfig
 
 from index.index import Index
 from index.pca_index import PCAIndex

@@ -1,6 +1,6 @@
 from datetime import datetime
 import numpy as np
-from table import VectorTable
+from tables.table import VectorTable
 
 
 class VectorDB:

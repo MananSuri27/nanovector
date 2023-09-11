@@ -14,6 +14,7 @@ def check_table_exists(route_function):
         if table not in tables:
             return jsonify(message="Table not found"), 404
         return route_function(table, *args, **kwargs)
+    wrapper.__name__ = route_function.__name__
     return wrapper
 
 def load_data_from_json(data, variable):
@@ -25,9 +26,7 @@ def load_data_from_json(data, variable):
     if f"{variable}_path" is not None and f"{variable}_path" in data:
         return np.load(f"{variable}_path")
     elif variable is not None and variable in data:
-        if not isinstance(data[variable], np.array):
-            raise ValueError(variable)
-        return data[variable]
+        return np.array(data[variable])
     else:
         return None
 
@@ -37,10 +36,9 @@ def create_table():
 
     # Extract table creation parameters from JSON data
     table_name = data.get("table_name")
-    description = data.get("description", None)  # Use default value None if "description" is not provided
-    embeddings_path = data.get("path", None)  # Use default value None if "path" is not provided
-    embeddings = data.get("embeddings", None)  # Use default value None if "embeddings" is not provided
-
+    description = data.get("description", None)  
+    embeddings_path = data.get("embeddings_path", None) 
+    embeddings = data.get("embeddings", None)  
 
     if embeddings_path is not None and embeddings is not None:
         app.logger.warning("Both 'embeddings_path' and 'embeddings' provided; 'embeddings_path' will be used.")
@@ -52,10 +50,10 @@ def create_table():
         return jsonify(message="Embeddings must have exactly 2 dimensions"), 400
 
     # Extract other configuration parameters
-    pca = data.get("pca", False)  # Use default value False if "pca" is not provided
-    normalise = data.get("normalise", True)  # Use default value True if "normalise" is not provided
+    pca = data.get("pca", False) 
+    normalise = data.get("normalise", True) 
     dim_input = embeddings.shape[1]
-    dim_final = data.get("dim_final", dim_input)  # Use dim_input as default if "dim_final" is not provided
+    dim_final = data.get("dim_final", dim_input)  
 
 
     # Create an IndexConfig object with specified configuration
@@ -78,7 +76,7 @@ def table_details(table):
 @app.route("/<table>/delete", methods=["DELETE"])
 @check_table_exists
 def delete_table(table):
-    del tables.delete_table(table)
+    tables.delete_table(table)
     return jsonify(message=f"Table {table} deleted successfully"), 200
 
 
