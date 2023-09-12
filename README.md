@@ -33,4 +33,4 @@ nanovector excels because it's:
 ## ⛏️ Set-up
 
 ## 📇 Contact
-Contact me on [Linkedin](https://www.linkedin.com/in/manansuri27/), drop an [email](mailto:manansuri27@gmail.com), or check me out on my website [manansuri.com](manansuri.com).
+Contact me on [Linkedin](https://www.linkedin.com/in/manansuri27/), drop an [email](mailto:manansuri27@gmail.com), or check me out on my website [manansuri.com](https://manansuri.com/).
