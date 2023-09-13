@@ -20,15 +20,14 @@ nanovector excels because it's:
 
 - **Lightweight:** Minimalist and easy to integrate.
   
-- **Efficient:** Speedy storage and retrieval.
-
-- **User-Friendly:** Simple design for quick adoption.
+- **Efficient:** Speedy storage and retrieval using barebone numpy.
 
 - **Versatile:** Ideal for embeddings, features, and more.
 
 - **Open Source:** Customizable and transparent.
 
 ## 🎨 Features
+
 
 ## ⛏️ Set-up
 
