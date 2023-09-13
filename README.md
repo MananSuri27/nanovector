@@ -36,6 +36,7 @@ Nanovector offers the following key features:
 - Dockerized for easy deployment.
 - Direct pipeline for converting text to vectors.
 - Integration with Sentence Transformers for powerful embeddings.
+- PCAIndex for scaling high dimensional embeddings.
 
 ## 🍥 System Design
 
