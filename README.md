@@ -22,13 +22,22 @@ nanovector excels because it's:
   
 - **Efficient:** Speedy storage and retrieval using barebone numpy.
 
+- **Dockerized:** Easily deploy Nanovector in containerized environments.
+
+- **Direct Text to Vector Pipeline:** Seamlessly convert text data into vectors within the database.
+
 - **Versatile:** Ideal for embeddings, features, and more.
 
 - **Open Source:** Customizable and transparent.
 
 ## 🎨 Features
+Nanovector offers the following key features:
+- Efficient vector storage and retrieval.
+- Dockerized for easy deployment.
+- Direct pipeline for converting text to vectors.
+- Integration with Sentence Transformers for powerful embeddings.
 
-
+  
 ## ⛏️ Set-up
 ### 🐳 Docker
 Assuming you have docker installed, you can easily use docker to setup the vector server.
