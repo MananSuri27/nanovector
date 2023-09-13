@@ -59,7 +59,7 @@ Follow the steps below to setup the repository and run the server.
    ```
 5. Install dependencies
    ```bash
-   pip install -r requirements.txt
+   pip3 install -r requirements.txt
    ```
 7. Run the server
    ```bash
