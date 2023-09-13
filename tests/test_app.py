@@ -1,7 +1,9 @@
-import pytest
-import numpy as np
-from app.app import app
 import json
+
+import numpy as np
+import pytest
+
+from app.app import app
 
 
 @pytest.fixture
@@ -41,6 +43,7 @@ def test_query(client):
 
     assert response.status_code == 200
 
+
 def test_details(client):
     """Test the /details route."""
     # Define test data
@@ -55,6 +58,7 @@ def test_details(client):
     # print(response)
 
     assert response.status_code == 200
+
 
 def test_add(client):
     """Test the /add route."""

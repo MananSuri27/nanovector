@@ -287,9 +287,10 @@ def test_add_valid_single_vector():
 
     new_vector_1 = np.random.rand(1, 10)
     index.add_vector(new_vector_1)
-    
+
     assert len(index) == 11
     assert len(index.embeddings) == 11
+
 
 def test_add_valid_multiple_vectors():
     dimension = 10
@@ -302,6 +303,7 @@ def test_add_valid_multiple_vectors():
     assert len(index) == 15
     assert len(index.embeddings) == 15
 
+
 def test_add_valid_vector_with_different_dimension():
     dimension = 10
     embeddings = np.random.rand(10, 10)
@@ -312,6 +314,7 @@ def test_add_valid_vector_with_different_dimension():
 
     assert len(index) == 11
     assert len(index.embeddings) == 11
+
 
 def test_add_invalid_vector_dimension_mismatch():
     dimension = 10
@@ -327,6 +330,7 @@ def test_add_invalid_vector_dimension_mismatch():
         str(exc_info.value)
         == f"Expected vector of dimension {dimension} but got {new_vector_4.shape[1]}"
     )
+
 
 def test_add_invalid_vector_dimension_too_large():
     dimension = 10
@@ -344,7 +348,6 @@ def test_add_invalid_vector_dimension_too_large():
     )
 
 
-
 def test_query_ideal_case():
     embeddings = np.random.rand(11, 10)
     dimension = 10
@@ -359,6 +362,7 @@ def test_query_ideal_case():
     assert ans1.shape[0] == k
     assert ans1.shape[1] == dimension
 
+
 def test_query_multi_vector():
     embeddings = np.random.rand(11, 10)
     dimension = 10
@@ -371,6 +375,7 @@ def test_query_multi_vector():
         index.get_similarity(query_2, k)
 
     assert str(exc_info.value) == "Multi-vector query not supported yet."
+
 
 def test_query_dimension_mismatch():
     embeddings = np.random.rand(11, 10)
@@ -385,6 +390,7 @@ def test_query_dimension_mismatch():
     assert len(res3.shape) == 1
     assert ans3.shape[0] == k
     assert ans3.shape[1] == dimension
+
 
 def test_query_incompatible_vector():
     embeddings = np.random.rand(11, 10)
@@ -402,6 +408,7 @@ def test_query_incompatible_vector():
         == f"Expected vector of dimension {dimension} but got {query_4.shape[0]}"
     )
 
+
 def test_query_k_zero():
     embeddings = np.random.rand(11, 10)
     dimension = 10
@@ -416,6 +423,7 @@ def test_query_k_zero():
     assert ans1.shape[0] == k
     assert ans1.shape[1] == dimension
 
+
 def test_query_k_negative():
     embeddings = np.random.rand(11, 10)
     dimension = 10
@@ -428,6 +436,7 @@ def test_query_k_negative():
         index.get_similarity(query_1, k)
 
     assert str(exc_info.value) == f"Expected k>0 got k={k}"
+
 
 def test_query_k_greater_than_index_length():
     embeddings = np.random.rand(11, 10)

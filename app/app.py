@@ -1,15 +1,16 @@
-from flask import Flask, jsonify, request
 import numpy as np
+from flask import Flask, jsonify, request
+from datetime import datetime
 
 from tables.db import VectorDB
 from tables.table import VectorTable
-
 from utils.config import IndexConfig
+from embedder.embedder import Embedder
 
 app = Flask(__name__)
 
 tables = VectorDB()
-
+models = {}
 
 def check_table_exists(route_function):
     def wrapper(table, *args, **kwargs):
@@ -42,15 +43,25 @@ def create_table():
     # Extract table creation parameters from JSON data
     table_name = data.get("table_name")
     description = data.get("description", None)
-    embeddings_path = data.get("embeddings_path", None)
-    embeddings = data.get("embeddings", None)
+    use_embedder = data.get("use_embedder",False)
+    model_name = data.get("model_name", None)
 
-    if embeddings_path is not None and embeddings is not None:
-        app.logger.warning(
-            "Both 'embeddings_path' and 'embeddings' provided; 'embeddings_path' will be used."
-        )
-
-    embeddings = load_data_from_json(data, "embeddings")
+    if use_embedder:
+        texts = data.get("texts", None)
+        if texts==None or model_name==None:
+            raise AssertionError('use_embedder not possible, either texts are missing or model_name is missing.')
+        if model_name not in models:
+            models[model_name] = Embedder(model_name)
+        
+        embeddings = models[model_name].generate_embeddings(texts)
+    else:
+        embeddings_path = data.get("embeddings_path", None)
+        embeddings = data.get("embeddings", None)
+        if embeddings_path is not None and embeddings is not None:
+            app.logger.warning(
+                "Both 'embeddings_path' and 'embeddings' provided; 'embeddings_path' will be used."
+            )
+        embeddings = load_data_from_json(data, "embeddings")
 
     # Check if embeddings has exactly 2 dimensions
     if len(embeddings.shape) != 2:
@@ -61,12 +72,13 @@ def create_table():
     normalise = data.get("normalise", True)
     dim_input = embeddings.shape[1]
     dim_final = data.get("dim_final", dim_input)
+    
 
     # Create an IndexConfig object with specified configuration
     config = IndexConfig(dim_input, dim_final, pca, normalise)
 
     # Create a VectorTable and add it to the database
-    table = VectorTable(table_name, config, embeddings, description)
+    table = VectorTable(table_name, config, embeddings, description, use_embedder, model_name)
     tables.add_table(table)
 
     return jsonify(message=f"Table '{table_name}' created successfully"), 201
@@ -92,15 +104,22 @@ def add_to_table(table):
 
     data = request.get_json()
 
-    vector = data.get("vector", None)
-    vector_path = data.get("vector_path", None)
+    if tables.get_table(table).use_embedder:
+        texts = data.get("texts", None)
+        if texts==None:
+            raise ValueError("Table is configured to work with texts, 'texts' field empty in request.")
+        
+        vector = models[tables.get_table(table).model_name].get_embeddings(texts)
+    else:
+        vector = data.get("vector", None)
+        vector_path = data.get("vector_path", None)
 
-    if vector_path is not None and vector is not None:
-        app.logger.warning(
-            "Both 'vector_path' and 'vector' provided; 'vector_path' will be used."
-        )
+        if vector_path is not None and vector is not None:
+            app.logger.warning(
+                "Both 'vector_path' and 'vector' provided; 'vector_path' will be used."
+            )
 
-    vector = load_data_from_json(data, "vector")
+        vector = load_data_from_json(data, "vector")
 
     tables.add_vector(table, vector)
 
@@ -115,15 +134,22 @@ def query_table(table):
     k = data.get("k", 1)
     k = int(k)
 
-    query_vector = data.get("query_vector", None)
-    query_vector_path = data.get("query_vector_path", None)
+    if tables.get_table(table).use_embedder:
+        texts = data.get("texts", None)
+        if texts==None:
+            raise ValueError("Table is configured to work with texts, 'texts' field empty in request.")
+        
+        query_vector = models[tables.get_table(table).model_name].get_embeddings(texts)
+    else:
+        query_vector = data.get("query_vector", None)
+        query_vector_path = data.get("query_vector_path", None)
 
-    if query_vector_path is not None and query_vector is not None:
-        app.logger.warning(
-            "Both 'query_vector_path' and 'query_vector' provided; 'query_vector_path' will be used."
-        )
+        if query_vector_path is not None and query_vector is not None:
+            app.logger.warning(
+                "Both 'query_vector_path' and 'query_vector' provided; 'query_vector_path' will be used."
+            )
 
-    query_vector = load_data_from_json(data, "query_vector")
+        query_vector = load_data_from_json(data, "query_vector")
 
     top_k_indices_sorted, top_k_embeddings = tables.query(table, query_vector, k)
 

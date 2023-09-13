@@ -1,8 +1,8 @@
 import numpy as np
-from utils.config import IndexConfig
 
 from index.index import Index
 from index.pca_index import PCAIndex
+from utils.config import IndexConfig
 
 
 def initialise_index(config: IndexConfig, embeddings: np.array):

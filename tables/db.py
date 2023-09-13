@@ -1,5 +1,7 @@
 from datetime import datetime
+
 import numpy as np
+
 from tables.table import VectorTable
 
 
@@ -32,8 +34,6 @@ class VectorDB:
         self.created_at = datetime.utcnow()
         self._tables = {}
 
-    
-
     def get_table(self, table_name: str):
         """
         Get a table with desired table name
@@ -48,7 +48,7 @@ class VectorDB:
             raise ValueError(f"Table {table_name} doesn't exist in the database.")
 
         return self._tables[table_name]
-    
+
     @property
     def tables(self):
         return self._tables

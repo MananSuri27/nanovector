@@ -25,6 +25,8 @@ class VectorTable:
         config: IndexConfig,
         embeddings: np.array,
         description: str = None,
+        use_embedder: bool = False,
+        model_name: str = None
     ):
         """
         Initialize a VectorTable instance.
@@ -34,6 +36,8 @@ class VectorTable:
             config (IndexConfig): The configuration for the table.
             embeddings (np.array): The embeddings stored in the table.
             description (str, optional): A description of the table (default is None).
+            use_embedder (bool, optional): Whether to use embedder (default is False).
+            model_name: (str, optional): Model string of sentence transformer to use for embedding (default is None).
         """
         self._uuid = uuid.uuid4()
         self._created_at = datetime.utcnow()
@@ -42,6 +46,9 @@ class VectorTable:
         self._index = initialise_index(config, embeddings)
         self._config = config
         self.description = description
+        self.use_embedder = use_embedder
+        self.model_name = model_name
+        
 
     @property
     def uuid(self) -> uuid.UUID:
@@ -89,12 +96,22 @@ class VectorTable:
     def config(self) -> IndexConfig:
         """Get the configuration of the table."""
         return self._config
+    
+    @property
+    def model_name(self):
+        return self._model_name
+
+    @property
+    def use_embedder(self):
+        return self._use_embedder
 
     def __repr__(self) -> str:
         return f"VectorTable(uuid={self.uuid}, created_at={self.created_at}, last_queried_at={self.last_queried_at}, table_name={self.table_name}, table_description={self.description}, config={self.config}, num_rows ={len(self.index)})"
 
     def __str__(self) -> str:
         return f"VectorTable(uuid={self.uuid}, created_at={self.created_at}, last_queried_at={self.last_queried_at}, table_name={self.table_name}, table_description={self.description}, config={self.config}, num_rows ={len(self.index)})"
+    
+
 
     def add_vector(self, vector: np.array):
         """
