@@ -57,7 +57,7 @@ def create_table():
         raise ValueError(
             "table_name contains characters that are not suitable for a URL. Please use only letters, numbers, hyphens, or underscores."
         )
-    
+
     description = data.get("description", None)
     use_embedder = data.get("use_embedder", False)
     model_name = data.get("model_name", None)
@@ -125,7 +125,6 @@ def add_to_table(table):
     texts = data.get("texts", None)
 
     if tables.get_table(table).use_embedder:
-        
         if texts == None:
             raise ValueError(
                 "Table is configured to work with texts, 'texts' field empty in request."
