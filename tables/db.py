@@ -148,6 +148,19 @@ class VectorDB:
         self.check_table(table_name)
         return self._tables[table_name].query(query_vector, k)
 
+    def update_time(self, table_name: str):
+        """
+        Update the last queried timestamp for a table.
+
+        Args:
+            table_name (str): The name of the table to update the timestamp for.
+
+        Raises:
+            ValueError: If the specified table does not exist in the database.
+        """
+        self.check_table(table_name)
+        self._tables[table_name].last_queried_at = datetime.utcnow()
+
     def check_table(self, table_name: str):
         """
         Check if a specified table exists in the database.

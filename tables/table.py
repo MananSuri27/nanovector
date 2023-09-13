@@ -16,7 +16,11 @@ class VectorTable:
         table_name (str): The name of the table.
         config (IndexConfig): The configuration for the table.
         embeddings (np.array): The embeddings stored in the table.
-        description (str): A description of the table (optional).
+        description (str, optional): A description of the table (default is None).
+        use_embedder (bool, optional): Whether to use an embedder (default is False).
+        model_name (str, optional): Model string of a sentence transformer to use for embedding (default is None).
+        has_texts (bool, optional): Whether the table has associated texts (default is False).
+        texts (list, optional): A list of associated texts (default is None).
     """
 
     def __init__(
@@ -27,6 +31,8 @@ class VectorTable:
         description: str = None,
         use_embedder: bool = False,
         model_name: str = None,
+        has_texts: bool = False,
+        texts: list = None,
     ):
         """
         Initialize a VectorTable instance.
@@ -36,8 +42,10 @@ class VectorTable:
             config (IndexConfig): The configuration for the table.
             embeddings (np.array): The embeddings stored in the table.
             description (str, optional): A description of the table (default is None).
-            use_embedder (bool, optional): Whether to use embedder (default is False).
-            model_name: (str, optional): Model string of sentence transformer to use for embedding (default is None).
+            use_embedder (bool, optional): Whether to use an embedder (default is False).
+            model_name (str, optional): Model string of a sentence transformer to use for embedding (default is None).
+            has_texts (bool, optional): Whether the table has associated texts (default is False).
+            texts (list, optional): A list of associated texts (default is None).
         """
         self._uuid = uuid.uuid4()
         self._created_at = datetime.utcnow()
@@ -46,8 +54,10 @@ class VectorTable:
         self._index = initialise_index(config, embeddings)
         self._config = config
         self.description = description
-        self.use_embedder = use_embedder
-        self.model_name = model_name
+        self._use_embedder = use_embedder
+        self._model_name = model_name
+        self._has_texts = has_texts
+        self._texts = texts
 
     @property
     def uuid(self) -> uuid.UUID:
@@ -110,21 +120,20 @@ class VectorTable:
     def __str__(self) -> str:
         return f"VectorTable(uuid={self.uuid}, created_at={self.created_at}, last_queried_at={self.last_queried_at}, table_name={self.table_name}, table_description={self.description}, config={self.config}, num_rows ={len(self.index)})"
 
-    def add_vector(self, vector: np.array):
+    def add_vector(self, vector: np.array, texts: Union[str, list] = None):
         """
         Add a vector to the vector table.
 
         Args:
             vector (np.array): The vector to be added to the table.
-
-        Note:
-            This method delegates the addition of the vector to the underlying index.
-
-        Example:
-            table = VectorTable(table_name="my_table", config=config, embeddings=embeddings)
-            vector = np.random.rand(1, config.dim_input)
-            table.add_vector(vector)
+            texts (Union[str, list], optional): An optional text or list of texts associated with the vector (default is None).
         """
+        if self.has_texts:
+            if isinstance(texts, list):
+                self._texts.extend(texts)
+            else:
+                self._texts.append(texts)
+
         self._index.add_vector(vector)
 
     def query(self, query_vector: np.array, k: int = 1):
@@ -143,4 +152,8 @@ class VectorTable:
             query_vector = np.random.rand(1, config.dim_input)
             top_k_indices, top_k_embeddings = table.query(query_vector, k=10)
         """
-        return self._index.get_similarity(query_vector, k)
+        top_k_indices_sorted, top_k_embeddings = self._index.get_similarity(
+            query_vector, k
+        )
+        texts = self.texts[top_k_indices_sorted] if self.has_texts else None
+        return top_k_indices_sorted, top_k_embeddings, texts

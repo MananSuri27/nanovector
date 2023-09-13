@@ -52,7 +52,6 @@ class PCAIndex(AbstractIndex):
         self.num_vectors = self.num_vectors + 1
 
     def get_similarity(self, query_vector: np.array, k: int):
-
         if k < 0:
             raise ValueError(f"Expected k>0 got k={k}")
         if (

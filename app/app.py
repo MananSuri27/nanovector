@@ -1,7 +1,9 @@
+import urllib.parse
 from datetime import datetime
 
 import numpy as np
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 
 from embedder.embedder import Embedder
 from tables.db import VectorDB
@@ -9,6 +11,7 @@ from tables.table import VectorTable
 from utils.config import IndexConfig
 
 app = Flask(__name__)
+CORS(app)
 
 tables = VectorDB()
 models = {}
@@ -38,12 +41,23 @@ def load_data_from_json(data, variable):
         return None
 
 
+@app.route("/", methods=["GET"])
+def trying():
+    return "hello"
+
+
 @app.route("/create", methods=["POST"])
 def create_table():
     data = request.get_json()
 
-    # Extract table creation parameters from JSON data
     table_name = data.get("table_name")
+    sanitized_table_name = table_name.replace("/", "_")
+
+    if sanitized_table_name != urllib.parse.quote(sanitized_table_name, safe="/"):
+        raise ValueError(
+            "table_name contains characters that are not suitable for a URL. Please use only letters, numbers, hyphens, or underscores."
+        )
+    
     description = data.get("description", None)
     use_embedder = data.get("use_embedder", False)
     model_name = data.get("model_name", None)
@@ -106,17 +120,18 @@ def delete_table(table):
 @app.route("/<table>/add", methods=["POST"])
 @check_table_exists
 def add_to_table(table):
-
     data = request.get_json()
 
+    texts = data.get("texts", None)
+
     if tables.get_table(table).use_embedder:
-        texts = data.get("texts", None)
+        
         if texts == None:
             raise ValueError(
                 "Table is configured to work with texts, 'texts' field empty in request."
             )
 
-        vector = models[tables.get_table(table).model_name].get_embeddings(texts)
+        vector = models[tables.get_table(table).model_name].generate_embeddings(texts)
     else:
         vector = data.get("vector", None)
         vector_path = data.get("vector_path", None)
@@ -128,7 +143,7 @@ def add_to_table(table):
 
         vector = load_data_from_json(data, "vector")
 
-    tables.add_vector(table, vector)
+    tables.add_vector(table, vector, texts)
 
     return jsonify(message="Row added successfully"), 201
 
@@ -148,7 +163,9 @@ def query_table(table):
                 "Table is configured to work with texts, 'texts' field empty in request."
             )
 
-        query_vector = models[tables.get_table(table).model_name].get_embeddings(texts)
+        query_vector = models[tables.get_table(table).model_name].generate_embeddings(
+            texts
+        )
     else:
         query_vector = data.get("query_vector", None)
         query_vector_path = data.get("query_vector_path", None)
@@ -160,12 +177,15 @@ def query_table(table):
 
         query_vector = load_data_from_json(data, "query_vector")
 
-    top_k_indices_sorted, top_k_embeddings = tables.query(table, query_vector, k)
+    top_k_indices_sorted, top_k_embeddings, texts = tables.query(table, query_vector, k)
 
     results = {
         "top_k_indices_sorted": top_k_indices_sorted.tolist(),
         "top_k_embeddings": top_k_embeddings.tolist(),
+        "texts": texts,
     }
+
+    tables.update_time(table)
 
     return jsonify(results), 200
 
