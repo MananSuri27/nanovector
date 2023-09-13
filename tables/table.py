@@ -26,7 +26,7 @@ class VectorTable:
         embeddings: np.array,
         description: str = None,
         use_embedder: bool = False,
-        model_name: str = None
+        model_name: str = None,
     ):
         """
         Initialize a VectorTable instance.
@@ -48,7 +48,6 @@ class VectorTable:
         self.description = description
         self.use_embedder = use_embedder
         self.model_name = model_name
-        
 
     @property
     def uuid(self) -> uuid.UUID:
@@ -96,7 +95,7 @@ class VectorTable:
     def config(self) -> IndexConfig:
         """Get the configuration of the table."""
         return self._config
-    
+
     @property
     def model_name(self):
         return self._model_name
@@ -110,8 +109,6 @@ class VectorTable:
 
     def __str__(self) -> str:
         return f"VectorTable(uuid={self.uuid}, created_at={self.created_at}, last_queried_at={self.last_queried_at}, table_name={self.table_name}, table_description={self.description}, config={self.config}, num_rows ={len(self.index)})"
-    
-
 
     def add_vector(self, vector: np.array):
         """

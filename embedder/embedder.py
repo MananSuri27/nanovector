@@ -1,5 +1,6 @@
 from sentence_transformers import SentenceTransformer
 
+
 class Embedder:
     def __init__(self, model_name):
         self.model_name = model_name

@@ -1,16 +1,18 @@
-import numpy as np
-from flask import Flask, jsonify, request
 from datetime import datetime
 
+import numpy as np
+from flask import Flask, jsonify, request
+
+from embedder.embedder import Embedder
 from tables.db import VectorDB
 from tables.table import VectorTable
 from utils.config import IndexConfig
-from embedder.embedder import Embedder
 
 app = Flask(__name__)
 
 tables = VectorDB()
 models = {}
+
 
 def check_table_exists(route_function):
     def wrapper(table, *args, **kwargs):
@@ -43,16 +45,18 @@ def create_table():
     # Extract table creation parameters from JSON data
     table_name = data.get("table_name")
     description = data.get("description", None)
-    use_embedder = data.get("use_embedder",False)
+    use_embedder = data.get("use_embedder", False)
     model_name = data.get("model_name", None)
 
     if use_embedder:
         texts = data.get("texts", None)
-        if texts==None or model_name==None:
-            raise AssertionError('use_embedder not possible, either texts are missing or model_name is missing.')
+        if texts == None or model_name == None:
+            raise AssertionError(
+                "use_embedder not possible, either texts are missing or model_name is missing."
+            )
         if model_name not in models:
             models[model_name] = Embedder(model_name)
-        
+
         embeddings = models[model_name].generate_embeddings(texts)
     else:
         embeddings_path = data.get("embeddings_path", None)
@@ -72,13 +76,14 @@ def create_table():
     normalise = data.get("normalise", True)
     dim_input = embeddings.shape[1]
     dim_final = data.get("dim_final", dim_input)
-    
 
     # Create an IndexConfig object with specified configuration
     config = IndexConfig(dim_input, dim_final, pca, normalise)
 
     # Create a VectorTable and add it to the database
-    table = VectorTable(table_name, config, embeddings, description, use_embedder, model_name)
+    table = VectorTable(
+        table_name, config, embeddings, description, use_embedder, model_name
+    )
     tables.add_table(table)
 
     return jsonify(message=f"Table '{table_name}' created successfully"), 201
@@ -106,9 +111,11 @@ def add_to_table(table):
 
     if tables.get_table(table).use_embedder:
         texts = data.get("texts", None)
-        if texts==None:
-            raise ValueError("Table is configured to work with texts, 'texts' field empty in request.")
-        
+        if texts == None:
+            raise ValueError(
+                "Table is configured to work with texts, 'texts' field empty in request."
+            )
+
         vector = models[tables.get_table(table).model_name].get_embeddings(texts)
     else:
         vector = data.get("vector", None)
@@ -136,9 +143,11 @@ def query_table(table):
 
     if tables.get_table(table).use_embedder:
         texts = data.get("texts", None)
-        if texts==None:
-            raise ValueError("Table is configured to work with texts, 'texts' field empty in request.")
-        
+        if texts == None:
+            raise ValueError(
+                "Table is configured to work with texts, 'texts' field empty in request."
+            )
+
         query_vector = models[tables.get_table(table).model_name].get_embeddings(texts)
     else:
         query_vector = data.get("query_vector", None)
