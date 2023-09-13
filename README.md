@@ -37,7 +37,10 @@ Nanovector offers the following key features:
 - Direct pipeline for converting text to vectors.
 - Integration with Sentence Transformers for powerful embeddings.
 
-  
+## 🍥 System Design
+
+<img width="75%" alt="image" src="https://github.com/MananSuri27/nanovector/assets/84636031/10a1e1b8-816e-4041-98b8-18a85a5ff977">
+
 ## ⛏️ Set-up
 ### 🐳 Docker
 Assuming you have docker installed, you can easily use docker to setup the vector server.
@@ -77,7 +80,7 @@ Follow the steps below to setup the repository and run the server.
 The server will be running on `localhost:5000` now.
 
 ## 📜 API Documentation
-
+API Documentation is available in the [app directory](https://github.com/MananSuri27/nanovector/blob/main/app/README.md).
 
 ## 📇 Contact
 Contact me on [Linkedin](https://www.linkedin.com/in/manansuri27/), drop an [email](mailto:manansuri27@gmail.com), or check me out on my website [manansuri.com](https://manansuri.com/).
