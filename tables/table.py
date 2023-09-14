@@ -1,5 +1,6 @@
 import uuid
 from datetime import datetime
+from typing import Union
 
 import numpy as np
 
