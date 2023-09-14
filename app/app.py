@@ -1,5 +1,4 @@
 import urllib.parse
-from datetime import datetime
 
 import numpy as np
 from flask import Flask, jsonify, request
