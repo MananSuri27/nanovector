@@ -114,6 +114,15 @@ class VectorTable:
     @property
     def use_embedder(self):
         return self._use_embedder
+    
+    @property
+    def has_texts(self):
+        return self._has_texts
+    
+    @property
+    def texts(self):
+        return self._texts
+
 
     def __repr__(self) -> str:
         return f"VectorTable(uuid={self.uuid}, created_at={self.created_at}, last_queried_at={self.last_queried_at}, table_name={self.table_name}, table_description={self.description}, config={self.config}, num_rows ={len(self.index)})"
