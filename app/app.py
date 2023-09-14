@@ -37,6 +37,7 @@ def load_data_from_json(data, variable):
     elif variable is not None and variable in data:
         return np.array(data[variable])
     else:
+        raise ValueError("Either path or  embeddings should be provided.")
         return None
 
 
@@ -50,9 +51,9 @@ def create_table():
     data = request.get_json()
 
     table_name = data.get("table_name")
-    sanitized_table_name = table_name.replace("/", "_")
+    table_name = table_name.replace("/", "_")
 
-    if sanitized_table_name != urllib.parse.quote(sanitized_table_name, safe="/"):
+    if table_name != urllib.parse.quote(table_name, safe="/"):
         raise ValueError(
             "table_name contains characters that are not suitable for a URL. Please use only letters, numbers, hyphens, or underscores."
         )
@@ -63,6 +64,7 @@ def create_table():
 
     if use_embedder:
         texts = data.get("texts", None)
+        print(texts)
         if texts == None or model_name == None:
             raise AssertionError(
                 "use_embedder not possible, either texts are missing or model_name is missing."
@@ -95,7 +97,13 @@ def create_table():
 
     # Create a VectorTable and add it to the database
     table = VectorTable(
-        table_name, config, embeddings, description, use_embedder, model_name
+        table_name,
+        config,
+        embeddings,
+        description,
+        use_embedder,
+        model_name,
+        texts=texts,
     )
     tables.add_table(table)
 

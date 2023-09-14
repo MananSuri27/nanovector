@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional, Union
 
 import numpy as np
 
@@ -104,13 +105,19 @@ class VectorDB:
 
         del self.tables[table_name]
 
-    def add_vector(self, table_name: str, vector: np.array):
+    def add_vector(
+        self,
+        table_name: str,
+        vector: np.array,
+        texts: Union[str, list[str], None] = None,
+    ):
         """
         Add a vector to a specified table.
 
         Args:
             table_name (str): The name of the table to which the vector will be added.
             vector (np.array): The vector to be added to the table.
+            texts ( Union[str, list[str], None]): corresponding texts to be added, defaults to None
 
         Raises:
             ValueError: If the specified table does not exist.
@@ -122,7 +129,7 @@ class VectorDB:
             db.add_vector(table_name, vector)
         """
         self.check_table(table_name)
-        self._tables[table_name].add_vector(vector)
+        self._tables[table_name].add_vector(vector, texts)
 
     def query(self, table_name: str, query_vector: np.array, k: int = 1):
         """

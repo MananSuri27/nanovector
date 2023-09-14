@@ -57,7 +57,7 @@ class VectorTable:
         self.description = description
         self._use_embedder = use_embedder
         self._model_name = model_name
-        self._has_texts = has_texts
+        self._has_texts = has_texts or texts != None
         self._texts = texts
 
     @property
@@ -114,21 +114,20 @@ class VectorTable:
     @property
     def use_embedder(self):
         return self._use_embedder
-    
+
     @property
     def has_texts(self):
         return self._has_texts
-    
+
     @property
     def texts(self):
         return self._texts
 
-
     def __repr__(self) -> str:
-        return f"VectorTable(uuid={self.uuid}, created_at={self.created_at}, last_queried_at={self.last_queried_at}, table_name={self.table_name}, table_description={self.description}, config={self.config}, num_rows ={len(self.index)})"
+        return f"VectorTable(uuid={self.uuid}, created_at={self.created_at}, last_queried_at={self.last_queried_at}, table_name={self.table_name}, table_description={self.description}, config={self.config}, num_rows={len(self.index)}, use_embedder={self.use_embedder}, self.has_texts={self.has_texts} )"
 
     def __str__(self) -> str:
-        return f"VectorTable(uuid={self.uuid}, created_at={self.created_at}, last_queried_at={self.last_queried_at}, table_name={self.table_name}, table_description={self.description}, config={self.config}, num_rows ={len(self.index)})"
+        return f"VectorTable(uuid={self.uuid}, created_at={self.created_at}, last_queried_at={self.last_queried_at}, table_name={self.table_name}, table_description={self.description}, config={self.config}, num_rows={len(self.index)}, use_embedder={self.use_embedder}, self.has_texts={self.has_texts} )"
 
     def add_vector(self, vector: np.array, texts: Union[str, list] = None):
         """
@@ -165,5 +164,10 @@ class VectorTable:
         top_k_indices_sorted, top_k_embeddings = self._index.get_similarity(
             query_vector, k
         )
-        texts = self.texts[top_k_indices_sorted] if self.has_texts else None
+
+        texts = (
+            [self.texts[i] for i in top_k_indices_sorted.tolist()]
+            if self.has_texts
+            else None
+        )
         return top_k_indices_sorted, top_k_embeddings, texts
