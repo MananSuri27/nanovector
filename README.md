@@ -82,6 +82,16 @@ The server will be running on `localhost:5000` now.
 
 ## 📜 API Documentation
 API Documentation is available in the [app directory](https://github.com/MananSuri27/nanovector/blob/main/app/README.md).
+## 🧪 Testing
+Once you have `pytest` installed, test using:
+```bash
+pytest
+```
+
+## 🍼 TODO
+- [ ] Add tests for PCAIndex
+- [ ] Include more similarity metrics
+
 
 ## 📇 Contact
 Contact me on [Linkedin](https://www.linkedin.com/in/manansuri27/), drop an [email](mailto:manansuri27@gmail.com), or check me out on my website [manansuri.com](https://manansuri.com/).
